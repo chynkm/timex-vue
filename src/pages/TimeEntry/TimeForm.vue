@@ -31,11 +31,11 @@
           <div class="col-2">
             <div class="form-group">
               <label>Time end</label>
-              <input type="email" class="form-control" placeholder="Time end" v-model="timeEntry.timeEnd">
+              <input type="email" class="form-control" placeholder="Time end" v-model="timeEntry.timeEnd" @blur="timeInDecimalHours">
             </div>
           </div>
         </div>
-        <p>Total time: {{ timeEntry.time }}</p>
+        <p>Total time: {{ this.timeEntry.time }}</p>
         <div class="form-group">
           <label>Description</label>
           <textarea class="form-control" placeholder="Here can be your description" v-model="timeEntry.description" rows="4"></textarea>
@@ -48,7 +48,7 @@
 <script>
 class Project {
   constructor(id, name) {
-    this.id = id;
+    this.id = id+1;
     this.name = name;
   }
 }
@@ -78,13 +78,6 @@ export default {
     };
   },
 
-  computed: {
-    totalTime() {
-      let timeBegin = this.timeEntry.timeBegin;
-      let timeEnd = this.timeEntry.timeEnd;
-    }
-  },
-
   mounted() {
       let currentdate = new Date();
       this.timeEntry.timeBegin = ('0'+currentdate.getHours()).slice(-2)+('0'+currentdate.getMinutes()).slice(-2);
@@ -92,17 +85,51 @@ export default {
 
   methods: {
     addTime() {
-      alert("Your data: " + JSON.stringify(this.user));
+      console.log("Your data: " + JSON.stringify(this.timeEntry));
+      axios.get('/time-entries', this.$timeEntry).then((data) => {
+        console.log(data);
+      },(error) => {
+        console.log(error);
+      });
+
+      // update the begin date to End date on successful submission
     },
 
-    updateEndTime() {
-      let currentdate = new Date();
-      this.timeEntry.timeEnd = currentdate.getHours()+':'+currentdate.getMinutes();
-    },
+    timeInDecimalHours: function() {
+      let timeBegin = this.timeEntry.timeBegin;
+      let timeEnd = this.timeEntry.timeEnd;
 
-    convertTimeToSeconds() {
+      if(timeEnd.length == 0) {
+        return;
+      }
 
-    },
+      if(timeBegin.length <= 3) {
+        timeBegin = '0'+timeBegin;
+      }
+
+      if(timeEnd.length <= 3) {
+        timeEnd = '0'+timeEnd;
+      }
+
+      // console.log(timeEnd, timeBegin);
+      if(timeEnd.length >= 4 && timeEnd < timeBegin) {
+        this.timeEntry.timeEnd = this.timeEntry.time = '';
+        return;
+      }
+
+      let timeBeginHour = timeBegin.substring(0, 2);
+      let timeBeginMinute = timeBegin.substring(2, 4);
+      let timeEndHour = timeEnd.substring(0, 2);
+      let timeEndMinute = timeEnd.substring(2, 4);
+      let timeBeginUnix = Math.round(new Date("2006/01/02 "+timeBeginHour+':'+timeBeginMinute).getTime()/1000);
+      let timeEndUnix = Math.round(new Date("2006/01/02 "+timeEndHour+':'+timeEndMinute).getTime()/1000);
+      // console.log(timeBeginHour, timeBeginMinute,timeEndHour,  timeEndMinute, timeBeginUnix, timeEndUnix, (timeEndUnix - timeBeginUnix)/3600);
+
+      this.timeEntry.time = ((timeEndUnix - timeBeginUnix)/3600).toFixed(2);
+      // console.log(this.timeEntry.time);
+      return this.timeEntry.time;
+
+    }
   }
 };
 </script>
