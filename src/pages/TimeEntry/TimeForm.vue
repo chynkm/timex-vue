@@ -6,7 +6,7 @@
           <div class="col-4">
             <div class="form-group">
               <label>Project name</label>
-              <select class="form-control" v-model="timeEntry.projectId">
+              <select class="form-control" v-model="timeEntry.projectId" @change="getRequirements">
                 <option disabled value="">Please select a project</option>
                 <option v-for="project in projects" v-bind:value="project.id" v-text="project.name"></option>
               </select>
@@ -46,21 +46,6 @@
   </card>
 </template>
 <script>
-class Project {
-  constructor(id, name) {
-    this.id = id+1;
-    this.name = name;
-  }
-}
-var projects = [];
-['A', 'B', 'C'].forEach((name, index) => {
-    projects.push(new Project(index, name));
-});
-
-var requirements = [];
-['R1', 'R2', 'R3'].forEach((name, index) => {
-    requirements.push(new Project(index, name));
-});
 
 export default {
   data() {
@@ -73,20 +58,63 @@ export default {
         description: '',
         time: 0,
       },
-      projects,
-      requirements,
+      projects: [],
+      requirements: [],
     };
   },
 
   mounted() {
-      let currentdate = new Date();
-      this.timeEntry.timeBegin = ('0'+currentdate.getHours()).slice(-2)+('0'+currentdate.getMinutes()).slice(-2);
+    this.setStartTime();
+    this.getProjects();
   },
 
   methods: {
+    setStartTime() {
+      let currentdate = new Date();
+      this.timeEntry.timeBegin = ('0'+currentdate.getHours()).slice(-2)+('0'+currentdate.getMinutes()).slice(-2);
+    },
+
+    getProjects() {
+      axios.get('projects')
+        .then((response) => {
+          let data = response.data;
+          if(data.status) {
+            this.projects = data.projects;
+          }
+        },(error) => {
+          this.projects = [];
+          this.$notify({
+            message: 'Oops! There was something wrong in fetching the projects',
+            type: 'danger'
+          })
+        });
+    },
+
+    getRequirements() {
+      this.timeEntry.requirementId = '';
+      axios.get('requirements', {
+          params: {
+            project_id: this.timeEntry.projectId
+          }
+        })
+        .then((response) => {
+          let data = response.data;
+          if(data.status) {
+            this.requirements = data.requirements;
+          }
+        },(error) => {
+          this.$notify({
+            message: 'Oops! There was something wrong in fetching the requirements',
+            type: 'danger'
+          })
+          this.requirements = [];
+        });
+
+    },
+
     addTime() {
       console.log("Your data: " + JSON.stringify(this.timeEntry));
-      axios.get('/time-entries', this.$timeEntry).then((data) => {
+      axios.get('time-entries', this.$timeEntry).then((data) => {
         console.log(data);
       },(error) => {
         console.log(error);
