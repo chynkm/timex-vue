@@ -1,44 +1,48 @@
 <template>
   <card class="card" title="Add time">
     <div>
-      <form @submit.prevent>
+      <form @submit.prevent @change="errors.clear($event.target.name)" @keydown="errors.clear($event.target.name)">
         <div class="row">
           <div class="col-4">
             <div class="form-group">
               <label>Project name</label>
-              <select class="form-control" v-model="timeEntry.projectId" @change="getRequirements">
+              <select class="form-control" v-model="timeEntry.projectId" name="timeEntry.projectId" @change="getRequirements">
                 <option disabled value="">Please select a project</option>
                 <option v-for="project in projects" v-bind:value="project.id" v-text="project.name"></option>
               </select>
+              <span class="help-block text-danger" v-if="errors.has('timeEntry.projectId')" v-text="errors.get('timeEntry.projectId')"></span>
             </div>
           </div>
           <div class="col-4">
             <div class="form-group">
               <label>Project name</label>
-              <select class="form-control" v-model="timeEntry.requirementId">
+              <select class="form-control" v-model="timeEntry.requirementId" name="timeEntry.requirementId">
                 <option disabled value="">Please select a requirement</option>
                 <option v-for="requirement in requirements" v-bind:value="requirement.id" v-text="requirement.name"></option>
               </select>
+              <span class="help-block text-danger" v-if="errors.has('timeEntry.requirementId')" v-text="errors.get('timeEntry.requirementId')"></span>
             </div>
           </div>
           <div class="col-2">
             <div class="form-group">
               <label>Time begin</label>
-              <!-- <input type="email" class="form-control" placeholder="Time begin" v-model="timeEntry.timeBegin" @blur="updateEndTime"> -->
-              <input type="email" class="form-control" placeholder="Time begin" v-model="timeEntry.timeBegin">
+              <input type="email" class="form-control" placeholder="Time begin" v-model="timeEntry.timeBegin" name="timeEntry.timeBegin">
+              <span class="help-block text-danger" v-if="errors.has('timeEntry.timeBegin')" v-text="errors.get('timeEntry.timeBegin')"></span>
             </div>
           </div>
           <div class="col-2">
             <div class="form-group">
               <label>Time end</label>
-              <input type="email" class="form-control" placeholder="Time end" v-model="timeEntry.timeEnd" @blur="timeInDecimalHours">
+              <input type="email" class="form-control" placeholder="Time end" v-model="timeEntry.timeEnd" name="timeEntry.timeEnd" @blur="timeInDecimalHours">
+              <span class="help-block text-danger" v-if="errors.has('timeEntry.timeEnd')" v-text="errors.get('timeEntry.timeEnd')"></span>
             </div>
           </div>
         </div>
         <p>Total time: {{ this.timeEntry.time }}</p>
         <div class="form-group">
           <label>Description</label>
-          <textarea class="form-control" placeholder="Here can be your description" v-model="timeEntry.description" rows="4"></textarea>
+          <textarea class="form-control" placeholder="Here can be your description" v-model="timeEntry.description" name="timeEntry.description" rows="4"></textarea>
+          <span class="help-block text-danger" v-if="errors.has('timeEntry.description')" v-text="errors.get('timeEntry.description')"></span>
         </div>
         <p-button type="primary" round @click.native.prevent="addTime">Add time</p-button>
       </form>
@@ -46,6 +50,39 @@
   </card>
 </template>
 <script>
+class Errors {
+  constructor() {
+    this.errors = {};
+  }
+
+  get(field) {
+    if(this.errors[field]) {
+      return this.errors[field];
+    }
+  }
+
+  record(errors) {
+    this.errors = errors;
+  }
+
+  has(field) {
+    return this.errors.hasOwnProperty(field);
+  }
+
+  clear(field) {
+    delete this.errors[field];
+  }
+}
+
+class Form {
+  constructor() {
+    this.data =
+  }
+
+  reset() {
+
+  }
+}
 
 export default {
   data() {
@@ -60,6 +97,7 @@ export default {
       },
       projects: [],
       requirements: [],
+      errors: new Errors(),
     };
   },
 
@@ -113,14 +151,15 @@ export default {
     },
 
     addTime() {
-      console.log("Your data: " + JSON.stringify(this.timeEntry));
-      axios.get('time-entries', this.$timeEntry).then((data) => {
-        console.log(data);
-      },(error) => {
-        console.log(error);
-      });
-
+      // console.log("Your data: " + JSON.stringify(this.timeEntry));
+      axios.post('time-entries', this.timeEntry)
+        .then((data) => {
+          console.log(data);
       // update the begin date to End date on successful submission
+      // setup notification
+      // list todays task in bottom
+        },(error) => this.errors.record(error.response.data));
+
     },
 
     timeInDecimalHours: function() {
