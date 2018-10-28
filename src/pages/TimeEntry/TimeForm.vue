@@ -1,48 +1,48 @@
 <template>
   <card class="card" title="Add time">
     <div>
-      <form @submit.prevent @change="errors.clear($event.target.name)" @keydown="errors.clear($event.target.name)">
+      <form @submit.prevent @change="form.errors.clear($event.target.name)" @keydown="form.errors.clear($event.target.name)">
         <div class="row">
           <div class="col-4">
             <div class="form-group">
               <label>Project name</label>
-              <select class="form-control" v-model="timeEntry.projectId" name="timeEntry.projectId" @change="getRequirements">
+              <select class="form-control" v-model="form.projectId" name="projectId" @change="getRequirements">
                 <option disabled value="">Please select a project</option>
                 <option v-for="project in projects" v-bind:value="project.id" v-text="project.name"></option>
               </select>
-              <span class="help-block text-danger" v-if="errors.has('timeEntry.projectId')" v-text="errors.get('timeEntry.projectId')"></span>
+              <span class="help-block text-danger" v-if="form.errors.has('projectId')" v-text="form.errors.get('projectId')"></span>
             </div>
           </div>
           <div class="col-4">
             <div class="form-group">
               <label>Project name</label>
-              <select class="form-control" v-model="timeEntry.requirementId" name="timeEntry.requirementId">
+              <select class="form-control" v-model="form.requirementId" name="requirementId">
                 <option disabled value="">Please select a requirement</option>
                 <option v-for="requirement in requirements" v-bind:value="requirement.id" v-text="requirement.name"></option>
               </select>
-              <span class="help-block text-danger" v-if="errors.has('timeEntry.requirementId')" v-text="errors.get('timeEntry.requirementId')"></span>
+              <span class="help-block text-danger" v-if="form.errors.has('requirementId')" v-text="form.errors.get('requirementId')"></span>
             </div>
           </div>
           <div class="col-2">
             <div class="form-group">
               <label>Time begin</label>
-              <input type="email" class="form-control" placeholder="Time begin" v-model="timeEntry.timeBegin" name="timeEntry.timeBegin">
-              <span class="help-block text-danger" v-if="errors.has('timeEntry.timeBegin')" v-text="errors.get('timeEntry.timeBegin')"></span>
+              <input type="email" class="form-control" placeholder="Time begin" v-model="form.timeBegin" name="timeBegin">
+              <span class="help-block text-danger" v-if="form.errors.has('timeBegin')" v-text="form.errors.get('timeBegin')"></span>
             </div>
           </div>
           <div class="col-2">
             <div class="form-group">
               <label>Time end</label>
-              <input type="email" class="form-control" placeholder="Time end" v-model="timeEntry.timeEnd" name="timeEntry.timeEnd" @blur="timeInDecimalHours">
-              <span class="help-block text-danger" v-if="errors.has('timeEntry.timeEnd')" v-text="errors.get('timeEntry.timeEnd')"></span>
+              <input type="email" class="form-control" placeholder="Time end" v-model="form.timeEnd" name="timeEnd" @blur="timeInDecimalHours">
+              <span class="help-block text-danger" v-if="form.errors.has('timeEnd')" v-text="form.errors.get('timeEnd')"></span>
             </div>
           </div>
         </div>
-        <p>Total time: {{ this.timeEntry.time }}</p>
+        <p>Total time: {{ this.form.time }}</p>
         <div class="form-group">
           <label>Description</label>
-          <textarea class="form-control" placeholder="Here can be your description" v-model="timeEntry.description" name="timeEntry.description" rows="4"></textarea>
-          <span class="help-block text-danger" v-if="errors.has('timeEntry.description')" v-text="errors.get('timeEntry.description')"></span>
+          <textarea class="form-control" placeholder="Here can be your description" v-model="form.description" name="description" rows="4"></textarea>
+          <span class="help-block text-danger" v-if="form.errors.has('description')" v-text="form.errors.get('description')"></span>
         </div>
         <p-button type="primary" round @click.native.prevent="addTime">Add time</p-button>
       </form>
@@ -50,54 +50,21 @@
   </card>
 </template>
 <script>
-class Errors {
-  constructor() {
-    this.errors = {};
-  }
-
-  get(field) {
-    if(this.errors[field]) {
-      return this.errors[field];
-    }
-  }
-
-  record(errors) {
-    this.errors = errors;
-  }
-
-  has(field) {
-    return this.errors.hasOwnProperty(field);
-  }
-
-  clear(field) {
-    delete this.errors[field];
-  }
-}
-
-class Form {
-  constructor() {
-    this.data =
-  }
-
-  reset() {
-
-  }
-}
+import Form from '../../classes/Form.js'
 
 export default {
   data() {
     return {
-      timeEntry: {
+      form: new Form({
         projectId: '',
         requirementId: '',
         timeBegin: '',
         timeEnd: '',
         description: '',
         time: 0,
-      },
+      }),
       projects: [],
       requirements: [],
-      errors: new Errors(),
     };
   },
 
@@ -109,7 +76,7 @@ export default {
   methods: {
     setStartTime() {
       let currentdate = new Date();
-      this.timeEntry.timeBegin = ('0'+currentdate.getHours()).slice(-2)+('0'+currentdate.getMinutes()).slice(-2);
+      this.form.timeBegin = ('0'+currentdate.getHours()).slice(-2)+('0'+currentdate.getMinutes()).slice(-2);
     },
 
     getProjects() {
@@ -129,10 +96,10 @@ export default {
     },
 
     getRequirements() {
-      this.timeEntry.requirementId = '';
+      this.form.requirementId = '';
       axios.get('requirements', {
           params: {
-            project_id: this.timeEntry.projectId
+            project_id: this.form.projectId
           }
         })
         .then((response) => {
@@ -144,27 +111,36 @@ export default {
           this.$notify({
             message: 'Oops! There was something wrong in fetching the requirements',
             type: 'danger'
-          })
+          });
           this.requirements = [];
         });
 
     },
 
     addTime() {
-      // console.log("Your data: " + JSON.stringify(this.timeEntry));
-      axios.post('time-entries', this.timeEntry)
-        .then((data) => {
-          console.log(data);
-      // update the begin date to End date on successful submission
-      // setup notification
-      // list todays task in bottom
-        },(error) => this.errors.record(error.response.data));
-
+      let timeEnd = this.form.timeEnd;
+      this.form.submit('post', 'time-entries')
+        .then(data => {
+          this.$notify({
+            message: data.message,
+            type: 'success'
+          });
+          this.form.timeBegin = timeEnd;
+        })
+        .catch(errors => {
+          if(this.form.errors == {}) {
+            this.$notify({
+              message: 'Oops! There was something wrong in saving the time entry',
+              type: 'danger'
+            });
+          }
+        });
+        // list todays task in bottom
     },
 
     timeInDecimalHours: function() {
-      let timeBegin = this.timeEntry.timeBegin;
-      let timeEnd = this.timeEntry.timeEnd;
+      let timeBegin = this.form.timeBegin;
+      let timeEnd = this.form.timeEnd;
 
       if(timeEnd.length == 0) {
         return;
@@ -178,9 +154,8 @@ export default {
         timeEnd = '0'+timeEnd;
       }
 
-      // console.log(timeEnd, timeBegin);
       if(timeEnd.length >= 4 && timeEnd < timeBegin) {
-        this.timeEntry.timeEnd = this.timeEntry.time = '';
+        this.form.timeEnd = this.form.time = '';
         return;
       }
 
@@ -190,12 +165,18 @@ export default {
       let timeEndMinute = timeEnd.substring(2, 4);
       let timeBeginUnix = Math.round(new Date("2006/01/02 "+timeBeginHour+':'+timeBeginMinute).getTime()/1000);
       let timeEndUnix = Math.round(new Date("2006/01/02 "+timeEndHour+':'+timeEndMinute).getTime()/1000);
-      // console.log(timeBeginHour, timeBeginMinute,timeEndHour,  timeEndMinute, timeBeginUnix, timeEndUnix, (timeEndUnix - timeBeginUnix)/3600);
 
-      this.timeEntry.time = ((timeEndUnix - timeBeginUnix)/3600).toFixed(2);
-      // console.log(this.timeEntry.time);
-      return this.timeEntry.time;
+      if(isNaN(timeBeginUnix)) {
+        this.form.timeBegin = this.form.time = '';
+        return;
+      }
+      if(isNaN(timeEndUnix)) {
+        this.form.timeEnd = this.form.time = '';
+        return;
+      }
 
+      this.form.time = ((timeEndUnix - timeBeginUnix)/3600).toFixed(2);
+      return this.form.time;
     }
   }
 };
