@@ -4,8 +4,8 @@
       <template slot="links">
         <sidebar-link to="/dashboard" name="Dashboard" icon="ti-panel"/>
         <sidebar-link to="/stats" name="User Profile" icon="ti-user"/>
-        <sidebar-link to="/time-entry" name="Time entry" icon="fa fa-clock-o"/>
-        <sidebar-link to="/table-list" name="Table List" icon="ti-view-list-alt"/>
+        <sidebar-link to="/add-time" name="Add time" icon="fa fa-clock-o"/>
+        <sidebar-link to="/time-entries" name="Time entries" icon="ti-view-list-alt"/>
         <sidebar-link to="/notifications" name="Notifications" icon="ti-bell"/>
       </template>
       <mobile-menu>

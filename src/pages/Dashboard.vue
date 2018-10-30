@@ -3,7 +3,7 @@
 
     <!--Stats cards-->
     <div class="row">
-      <div class="col-md-6 col-xl-3" v-for="stats in statsCards" :key="stats.title">
+      <div class="col-md-6 col-xl-4" v-for="stats in statsCards" :key="stats.title">
         <stats-card>
           <div class="icon-big text-center" :class="`icon-${stats.type}`" slot="header">
             <i :class="stats.icon"></i>
@@ -87,36 +87,58 @@ export default {
     return {
       statsCards: [
         {
-          type: "warning",
-          icon: "ti-server",
-          title: "Capacity",
-          value: "105GB",
-          footerText: "Updated now",
-          footerIcon: "ti-reload"
+          type: "info",
+          icon: "fa fa-clock-o",
+          title: "Time utilised",
+          value: "",
+          footerText: "Current month",
+          footerIcon: "ti-calendar",
+          key: 'current_month_time',
         },
         {
           type: "success",
           icon: "ti-wallet",
-          title: "Revenue",
-          value: "$1,345",
-          footerText: "Last day",
-          footerIcon: "ti-calendar"
+          title: "Salary",
+          value: "",
+          footerText: "Current month",
+          footerIcon: "ti-timer",
+          key: 'current_month_rate',
         },
         {
           type: "danger",
-          icon: "ti-pulse",
-          title: "Errors",
-          value: "23",
-          footerText: "In the last hour",
-          footerIcon: "ti-timer"
+          icon: "fa fa-heartbeat",
+          title: "Health",
+          value: "",
+          footerText: "Current month",
+          footerIcon: "ti-timer",
+          key: 'current_month_health_time',
         },
         {
           type: "info",
-          icon: "ti-twitter-alt",
-          title: "Followers",
-          value: "+45",
-          footerText: "Updated now",
-          footerIcon: "ti-reload"
+          icon: "fa fa-clock-o",
+          title: "Total time utilised",
+          value: "",
+          footerText: "Till date",
+          footerIcon: "ti-calendar",
+          key: 'total_time',
+        },
+        {
+          type: "success",
+          icon: "ti-wallet",
+          title: "Total salary",
+          value: "",
+          footerText: "Till date",
+          footerIcon: "ti-timer",
+          key: 'total_rate',
+        },
+        {
+          type: "danger",
+          icon: "fa fa-heartbeat",
+          title: "Total Health",
+          value: "",
+          footerText: "Till date",
+          footerIcon: "ti-timer",
+          key: 'health_total_time',
         }
       ],
       usersChart: {
@@ -189,6 +211,29 @@ export default {
         options: {}
       }
     };
+  },
+
+  mounted() {
+    this.getStats();
+  },
+
+  methods: {
+    getStats() {
+      axios.get('stats')
+        .then((response) => {
+          let data = response.data;
+          if(data.status) {
+            this.statsCards.forEach(stat => {
+              stat.value = data.stats[stat.key];
+            });
+          }
+        },(error) => {
+          this.$notify({
+            message: 'Oops! There was something wrong in fetching the statatics.',
+            type: 'danger'
+          })
+        });
+    }
   }
 };
 </script>
