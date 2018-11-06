@@ -10,14 +10,14 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <router-link :to="{path:'/'}" class="navbar-brand">Site title</router-link>
+          <router-link :to="{path:'/'}" class="navbar-brand">Timex</router-link>
         </div>
-  
+
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="navigation-example-2">
           <ul class="nav navbar-nav navbar-right">
             <li>
-              <router-link :to="{path:'/'}">Home</router-link>
+              <router-link :to="{path:'/'}">Timex</router-link>
             </li>
           </ul>
         </div>
@@ -39,19 +39,8 @@
     </div>
     <footer class="footer-demo">
       <div class="container">
-        <nav class="pull-left">
-          <ul>
-            <li>
-              <router-link :to="{path:'/'}">Home</router-link>
-            </li>
-            <li>
-              <router-link :to="{path:'/register'}">Register</router-link>
-            </li>
-          </ul>
-        </nav>
         <div class="copyright pull-right">
-          &copy; 2017, made with
-          <i class="fa fa-heart heart"></i> by Paper admin
+          &copy; 7km
         </div>
       </div>
     </footer>

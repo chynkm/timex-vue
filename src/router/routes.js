@@ -8,6 +8,7 @@ import UserProfile from "@/pages/UserProfile.vue";
 import Notifications from "@/pages/Notifications.vue";
 import TimeEntries from "@/pages/TimeEntries.vue";
 import AddTime from "@/pages/AddTime.vue";
+import Login from "@/pages/Login.vue";
 
 const routes = [
   {
@@ -39,8 +40,13 @@ const routes = [
         path: "add-time",
         name: "add time",
         component: AddTime
-      }
+      },
     ]
+  },
+  {
+    path: "/login",
+    name: "Login",
+    component: Login
   },
   { path: "*", component: NotFound }
 ];
