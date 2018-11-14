@@ -23,15 +23,15 @@
     <div class="row">
       <div class="col-12">
         <chart-card title="Last 1 month time spent"
-                    sub-title="All time entries excluding Health"
+                    sub-title=""
                     :chart-data="activityChart.data"
                     :chart-options="activityChart.options">
           <div slot="legend">
-            <i class="fa fa-circle text-info"></i> Time utilisation
+            <i class="fa fa-circle text-info"></i> Work
+            <i class="fa fa-circle text-warning"></i> Health
           </div>
         </chart-card>
       </div>
-
     </div>
 
   </div>
@@ -106,26 +106,7 @@ export default {
         }
       ],
       activityChart: {
-        data: {
-          labels: [
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "Mai",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec"
-          ],
-          series: [
-            [542, 543, 520, 680, 653, 753, 326, 434, 568, 610, 756, 895],
-            [230, 293, 380, 480, 503, 553, 600, 664, 698, 710, 736, 795]
-          ]
-        },
+        data: {},
         options: {
           seriesBarDistance: 10,
           axisX: {
@@ -167,6 +148,8 @@ export default {
           if(data.status) {
             this.activityChart.data.labels = data.dates;
             this.activityChart.data.series = data.series;
+            // So that the chart is rendered
+            window.dispatchEvent(new Event('resize'));
           }
         },(error) => {
           this.$notify({
